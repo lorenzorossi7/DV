@@ -1,0 +1,68 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+RNPL = @RNPL@
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+LIBS       = @LIBS@ 
+LDFLAGS    = @LDFLAGS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @DEFS@ -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	$(CC_COMP) -c $*.c
+
+all: updates_f1.o
+
+diff_1d_rnpl: diff_1d_rnpl.ex
+	rm diff_1d_rnpl > /dev/null 2>&1
+	($(PERL) $(DV_HOME)/bin/ex_pp diff_1d_rnpl.ex diff_1d_rnpl)
+
+updates_f1.o: updates_f1.f
+
+updates_f1.f: diff_1d_rnpl
+	$(RNPL) -l allf diff_1d_rnpl
+	mv updates.f tmp 
+	sed -e "s/update/upd_f1/" tmp > updates_f1.f
+	rm tmp
+	rm diff_1d.f initializers.f residuals.f sys_param.inc gfuni0.inc diff_1d_init.f other_glbs.inc
+
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm updates_f1.f globals.inc > /dev/null 2>&1
+	rm .rnpl.attributes > /dev/null 2>&1
+	rm diff_1d_rnpl > /dev/null 2>&1
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

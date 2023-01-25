@@ -1,0 +1,109 @@
+#!/bin/sh
+
+trace_args="true"
+trace="false"
+
+ctrl_c_trap()
+{
+   dvrcomm "exit"
+   exit 1
+}
+
+Usage() {
+cat<<END
+
+Concatenates a set of sdf files, with data between times t1 and tn, using DVR
+
+Usage: dv_cat oname oname_dir t1 tn [-i 'ivec'] [-s] file1 file2 ...
+
+ oname -- output register name
+ oname_dir -- directory to save result to
+ t1 -- first time 
+ tn -- last time 
+ -i -- passed to sdftodv
+ -s -- passed to sdftodv
+
+ order of the optional arguments is arbitrary, but oname oname_dir t1 tn must be first
+ and in that order, and the sdf files must come at the end
+
+NOTE: this program sets DVRHOST to `hostname`, 
+      and starts and stops DVR on the local machine
+END
+}
+
+num=0
+snum=5
+
+case $# in
+0) Usage;;
+1) Usage;;
+2) Usage;;
+3) Usage;;
+4) Usage;;
+*) oname=$1
+   oname_dir=$2
+   t1=$3
+   tn=$4
+   ivec1=""
+   ivec2="NULL"
+   s=""
+   get_ivec2="false"
+   for i in $@
+   do
+      num=`expr $num + 1`
+      if test $get_ivec2 = "true"
+      then
+         ivec2=$i
+         get_ivec2="false"
+      fi
+      case $i in 
+        "-s") s="-s"; snum=`expr $num + 1`;;
+        "-i") ivec1="-i"; get_ivec2="true"; snum=`expr $num + 2`;;
+        *);;
+      esac
+   done
+
+   if test $trace_args = "true"
+   then
+      echo "oname =" $oname
+      echo "oname_dir =" $oname_dir
+      echo "t1 =" $t1
+      echo "tn =" $tn
+      echo "sdftodv options =" "-r" $s $ivec1 '$ivec2'
+   fi
+
+   DVRHOST=`hostname`
+   export DVRHOST
+   DVR&
+   trap ctrl_c_trap 2
+
+   # give DVR time to set up it's input port
+   sleep 1
+
+   num=1
+   for i in $@
+   do
+      if test $num -ge $snum
+      then
+         if test $trace = "true"
+         then
+            echo "executing: sdftodv -r -n $oname -t $t1 $tn $s $ivec1 '$ivec2' $i"
+         fi
+         if test $ivec2 = "NULL"
+         then
+            sdftodv -r -n $oname -t $t1 $tn $s $i
+         else
+            sdftodv -r -n $oname -t $t1 $tn $a $s $ivec1 "$ivec2" $i
+         fi
+      fi
+      num=`expr $num + 1`
+   done 
+   oname_r=\"$oname_dir'/'$oname\"
+   dvrcomm "save $oname > $oname_r"
+   dvrcomm "delete $oname"
+
+   dvrcomm "exit"
+   
+   # wait for DVR to quit
+   wait
+esac

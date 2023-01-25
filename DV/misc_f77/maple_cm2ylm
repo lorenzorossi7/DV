@@ -1,0 +1,84 @@
+# get analytic expressions for the lower spin weight
+# -2 ylm modes, l=2..6. Do this, rather than use one of the
+# recursion formulas, as then we'd have to worry
+# about the way in which we calculate things on axis
+# (many apparently singular 1/sin^2 terms cancel)
+#
+# Ref. astro-ph/0508514
+#
+
+# to get the correct branch cut:
+
+_EnvLegendreCut := 1..infinity;
+
+# but must compose with cos(x), and with m>=0, else get imaginary values.
+
+plm:= proc(l::integer,m::integer)
+   if (m<0) then error "plm: error .. m must be >=0" fi;
+   (subs(cos(x)=x,simplify(LegendreP(l,m,cos(x)),'LegendreP')));
+end:
+
+#
+# following is spin s Ylm/e^{im phi},
+#
+# i.e. just the x=cos(theta) part
+#
+# s=+2, -2
+#
+# m<=l
+#
+# l>=2
+#
+
+
+pm2Ylm_d := proc(s::integer,l::integer,m::integer)
+   local p_lm1_am,p_l_am,alpha_pm,beta_pm,y_l_m,y_lm1_m,t1;
+
+   if (not (abs(s) = 2)) then
+      error "error ... s must be +-2";
+   fi:
+
+   # use Y_{l,-m} = -1^m bar{Y_{lm}} to map -m to +m
+
+   p_l_am:=plm(l,abs(m)):
+   y_l_m:=sqrt((2*l+1)/4/Pi*((l-abs(m))!)/((l+abs(m))!))*p_l_am;
+   if (m<0) then y_l_m:=y_l_m*(-1)^m fi;
+   
+   p_lm1_am:=plm(l-1,abs(m)):
+   if (l=abs(m)) then
+      y_lm1_m:=0 
+   else
+      y_lm1_m:=sqrt((2*(l-1)+1)/4/Pi*((l-1-abs(m))!)/((l-1+abs(m))!))*p_lm1_am;
+      if (m<0) then y_lm1_m:=y_lm1_m*(-1)^m fi;
+   fi;
+
+   alpha_pm:=(2*m^2-l*(l+1))/(1-x^2)-s*m*(l-1)*x/(1-x^2)+l*(l-1)*x^2/(1-x^2);
+   beta_pm:=2*((2*l+1)/(2*l-1)*(l^2-m^2))^(1/2)*(s/2*m/(1-x^2)+x/(1-x^2));
+
+   t1:=(((l-2)!)/((l+2)!))^(1/2)*(alpha_pm*y_l_m + beta_pm*y_lm1_m);
+   factor(simplify(t1));
+end:
+
+# l=2..6
+
+#
+# indexing ... l_{max}=6, so l,m coefficient in q[l-1,m+l+1]
+#
+
+rng:=6;
+
+q:=array(1..rng-1,1..2*rng+1);
+
+for l from 1 to rng-1 do
+   for m from 1 to 2*rng+1 do
+      q[l,m]:=0;
+   end do;
+end do;
+
+for l from 2 to 6 do
+   for m from -l to l do
+      q[l-1,m+l+1]:=pm2Ylm_d(-2,l,m);
+   end do;
+end do;
+
+codegen[fortran](q,precision=double,optimized,filename="m2yl6m.inc");

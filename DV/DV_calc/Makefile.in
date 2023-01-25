@@ -1,0 +1,76 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+YACC = bison
+LEX = flex
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+#CLIBS     = -lbbhutil -lsv $(SYSLIB) -lforms -lpthread -lbbh_xyz_stream -lcliser $(CLISERLIB) -lDVCliser -lutilio -lg2c -ljpeg
+LIBGL    =  @LIBGL@
+
+
+LIBS       = @LIBS@ @LIBGL@ -lm @CCF77LIBS@ 
+#LIBS       = @LIBS@ -lm
+LDFLAGS    = @LDFLAGS@ @APP_LIB_PATHS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @DEFS@ -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	$(CC_COMP) -c $*.c
+
+OBJS = DV_calc.tab.o lex.DV_calc.o parse.o DV_calc_debug.o
+EXEC = DV_calc_debug
+
+all: $(EXEC)
+
+DV_calc.tab.c: DV_calc.y
+	$(YACC) -p DV_calc -d DV_calc.y 
+
+lex.DV_calc.c: DV_calc.tab.h DV_calc.l
+	$(LEX) -PDV_calc DV_calc.l
+
+parse.c: parse.h
+
+DV_calc_debug: $(OBJS)
+	$(CC_LOAD) $(OBJS) $(LIBS) -o DV_calc_debug
+
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *.tab.c > /dev/null 2>&1
+	rm *.tab.h > /dev/null 2>&1
+	rm lex.*.c > /dev/null 2>&1
+	rm DV_calc > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

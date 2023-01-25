@@ -1,0 +1,76 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Visualizing 2D registers
+<hr WIDTH="100%"></h2></center>
+DV provides a rendering tool to visualize 2D data as a surface plot. To
+use it, <i>select</i> an individual grid, a set of grids, levels or times,
+or even entire registers, and then click the <b>Send to local view </b>button
+on the main window. Items on the main window can be selected or deselected
+by clicking on them with the <i>left mouse button</i>. Selected items are
+highlighted in yellow. For example, if you click on time level 5 of <b>2d_phi_0</b>
+with the left mouse button, and then click on the <b>Send to local view
+</b>button,
+a window should pop-up that looks something like this:
+<p><img SRC="local_view_1.jpg" height=706 width=718>
+<p>If multiple objects are selected and sent, all corresponding grids will
+be displayed sequentially in time; i.e., this is how you <i>animate</i>
+a sequence of grids. An animation can be halted by pressing the <b>escape</b>
+key. You can also single-step through the grids in a register by first
+selecting one time (or level or grid), then, while the DV main window is
+still the active one, press the <b>cursor</b> keys or clickon the
+<b>up/down
+arrow </b>buttons just below the <b>Send to local view </b>button.
+<p>A short-cut for sending a single time, level or grid within a register
+is to single click on the corresponding item with the <i>right mouse button</i>.
+<p>The default annotation and color coding is as follows. The time of the
+grid(s) is shown in the upper left corner of the view; directly below this
+are the minimum and maximum function bounds in parenthesis. Grid functions
+are converted to a surface plot where both the color and height of the
+surface denote the magnitude of the grid function. The current function-value
+to color conversion scale is given by the color bar on the lower right
+portion of the view. The actual coordinate height of the surface is the
+magnitude of the function multiplied by some constant scale ("zscale"),
+the current value of which is displayed in the upper right corner. Below
+the zscale label is the array size of the grid, and below this the coordinate
+bounding box of the grid. NOTE: if multiple grids are rendered simultaneously,
+only the array size and coordinate domain of the <i>last</i> grid that
+is drawn is shown here.
+<h3>
+Changing the view</h3>
+The image can be manipulated via the following click-and-drag operations,
+which control a virtual track-ball:
+<p><u><i>rotate</i>:</u>&nbsp; <b>left mouse button</b>&nbsp; or&nbsp;
+<b>right mouse button</b>
+<p><i><u>translate</u><b>:</b></i> <b>middle mouse button&nbsp;</b> or&nbsp;
+
+<b>left mouse button &amp; Ctrl key</b>
+<p><i><u>zoom</u></i>: <b>left mouse button &amp; middle mouse button</b>&nbsp;
+or&nbsp;&nbsp; <b>middle mouse button &amp; Ctrl key</b>&nbsp; or&nbsp;
+<b>left mouse button &amp; Shift key</b>
+<p>The view can be reset to a user-definable default by clicking on the
+<b>Home</b>
+button. The default is specified via a spherical polar viewing angle <b>theta</b>
+and <b>phi</b>, and a <b>zoom</b> factor.
+<p>
+<hr WIDTH="100%">
+<p>Parameters controlling how the surface plot is generated can be specified
+via the <b>options</b> button on the main window, and are briefly explained
+<a href="sec_48.html">here</a>.
+<p>Rendering, annotation and screen capture parameters are set by using
+the
+<b>Options</b> menu on the local view window, and are explained <i>here
+(under construction)</i>.
+<p>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="sec_31.html">Previous</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="sec_33.html">Next</a>
+</body>
+</html>

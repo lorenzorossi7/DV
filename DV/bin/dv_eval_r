@@ -1,0 +1,142 @@
+#!/bin/sh
+
+trace_args="true"
+trace="false"
+
+ctrl_c_trap()
+{
+   dvrcomm "exit"
+   exit 1
+}
+
+Usage() {
+cat<<END
+
+Applies the DV "eval_r" function, time step by time step,
+then routes it to DV.
+
+Usage: dv_eval_r oname t1 tn dt R1 R2 dR Ntheta Nphi [-i 'ivec'] [-s] file1 file2 ...
+
+ oname -- output register name
+ t1 -- first time 
+ tn -- last time 
+ dt -- size of time chunks to send (NOTE ... no fuzzy logic!)
+ R1,R1,dR -- range of radii to evaluate at
+ Ntheta,Nphi -- size of grid
+ -i -- passed to sdftodv
+ -s -- passed to sdftodv
+
+ order of the optional arguments is arbitrary, but oname t1 tn must be first
+ and in that order, and the sdf files must come at the end
+
+NOTE: this program sets DVRHOST to `hostname`, 
+      and starts and stops DVR on the local machine
+
+      Also, assumes *every* one of the files has the same time-level structure
+END
+}
+
+num=0
+snum=10
+
+case $# in
+0) Usage;;
+1) Usage;;
+2) Usage;;
+3) Usage;;
+4) Usage;;
+5) Usage;;
+6) Usage;;
+7) Usage;;
+8) Usage;;
+9) Usage;;
+*) oname=$1
+   t1=$2
+   tn=$3
+   dt=$4
+   R1=$5
+   R2=$6
+   dR=$7
+   Ntheta=$8
+   Nphi=$9
+   ivec1=""
+   ivec2="NULL"
+   s=""
+   get_ivec2="false"
+   for i in $@
+   do
+      num=`expr $num + 1`
+      if test $get_ivec2 = "true"
+      then
+         ivec2=$i
+         get_ivec2="false"
+      fi
+      case $i in 
+        "-s") s="-s"; snum=`expr $num + 1`;;
+        "-i") ivec1="-i"; get_ivec2="true"; snum=`expr $num + 2`;;
+        *);;
+      esac
+   done
+
+   if test $trace_args = "true"
+   then
+      echo "oname =" $oname
+      echo "t1 =" $t1
+      echo "tn =" $tn
+      echo "dt =" $dt
+      echo "R1 =" $R1
+      echo "R2 =" $R2
+      echo "dR =" $dR
+      echo "Ntheta =" $Ntheta
+      echo "Nphi =" $Nphi
+      echo "sdftodv options =" "-r" $s $ivec1 '$ivec2'
+   fi
+
+   DVRHOST=`hostname`
+   export DVRHOST
+   DVR&
+   trap ctrl_c_trap 2
+
+   # give DVR time to set up it's input port
+   sleep 1
+
+   first="true"
+   for t0 in `seq $t1 $dt $tn`
+   do
+      if test $first = "false"
+      then
+         num=1
+         for i in $@
+         do
+            if test $num -ge $snum
+            then
+               if test $trace = "true"
+               then
+                  echo "executing: sdftodv -r -n $oname -t $tp $t0 $s $ivec1 '$ivec2' $i"
+               fi
+               if test $ivec2 = "NULL"
+               then
+                  sdftodv -r -n $oname -t $tp $t0 $s $i
+               else
+                  sdftodv -r -n $oname -t $tp $t0 $a $s $ivec1 "$ivec2" $i
+               fi
+            fi
+            num=`expr $num + 1`
+         done 
+         for R in `seq $R1 $dR $R2`
+         do
+            oname_r=\"$oname'_eval_r_'$R\"
+            args=\'$R,$Ntheta,$Nphi\'
+            dvrcomm "mask = $oname"
+            dvrcomm "mask_val = 0"
+            dvrcomm "$oname_r = eval_r($oname,$args)"
+            dvrcomm "route $oname_r"
+            dvrcomm "delete $oname_r"
+         done
+         dvrcomm "delete $oname"
+      fi
+      tp=$t0
+      first="false"
+   done
+   dvrcomm "exit"
+esac

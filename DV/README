@@ -1,0 +1,202 @@
+OLD ... refer to /doc for newer documentation. Also, many of the bugs
+listed below have been fixed
+
+===============================================================================
+
+The following lists a few of the not-so-obvious features of the Data Vault (DV).
+Sometime in the future more thorough documentation will be provided.
+
+===============================================================================
+
+Use the utility 'sdftodv' to send SDF files to the DV.
+
+Main window
+-----------
+
+The "Data-Vault contents" browser presents a list of all registers
+currently in the DV.
+
+A register is a list of grids, sorted first via time, then level.
+Double clicking on a register will "open" it, displaying a list of times.
+Doubling clicking on a time will open a list of levels at that time.
+Double clicking on a level will display the grids that exist at that level 
+and time. Double clicking an open item will close it.
+
+Single clicking with the left mouse button selects/deselects multiple
+items in the browser list.
+Single clicking with the middle mouse button single-selects the clicked
+item. 
+Single clicking with the right mouse button on a time/level/grid
+will send the corresponding information to the local view 
+(i.e. a short-cut for clicking with the middle button, then clicking on
+the "Send to local view" button).
+
+If the "Data Browser" is open, middle/right mouse clicks will update
+its view with the selected grid. Note that opening the data browser
+will NOT refresh it, i.e. a grid must be selected afterwards.
+
+The "Send to" buttons send all selected items to the corresponding
+visualization servers. Note that, as of this time, the send operations
+cannot be aborted once started (will add an escape feature in the
+near future).
+
+If you hold down the shift key while selecting an item from the "Edit"
+menu, then the operation will only apply to the set of selected objects
+in the browser. 
+
+When sending a large SDF, you can force the display to update and
+show what part of it is currently in the DV by selecting the "Refresh Now"
+option from the "View" menu. 
+
+"Write SDF to file" in the File menu only writes one register, regardless
+of how many you select.
+
+known bugs ---- the main window is always beneath all other DV windows
+           ---- sometimes when sending a grid to the local view with
+                the right mouse button, all grids below it in the browser
+                list also get sent (I think this is an Xforms bug).
+
+Differentiate window
+--------------------
+
+known bug --- The first time this window is opened, always select a register
+              to differentiate first before selecting "with respect to"
+
+Function window
+---------------
+
+"Filter" is an optional string used to select a subset of the source registers
+to be operated upon. The format is 
+
+"t=ivec;l=ivec;cb=coordinate bbox;ib=index bbox"
+
+Each piece is optional, and the ordering is arbitrary (although only
+1 of cb or ib will be interpreted). "t" selects a set of time indecies,
+for example "t=1-10/2,15,20-*/5"; "l" selects a set of level indecies;
+"cb" specifies a coordinate bounding box via
+"x1_min,x1_max,x2_min,x2_max,x3_min,x3_max", for example (2D) "cb=0,1,-1,2.3";
+and "ib" specifies an array-index bounding box, via
+"imin,imax,jmin,jmax,kmin,kmax".
+The parser for the filter string isn't very smart at this time ---
+it doesn't give format error messages, but simply ignores parts of the string
+it doesn't understand. So an internal trace statement has been
+left on that echo's what has is recognized.
+
+The Mask register is an optional argument recognized by some grid functions,
+and can be used to restrict the operation to a subset of the grid.
+Whenever Mask==Mask value, the operation is *NOT* applied (or the corresponding
+point in the new grid is set to zero)
+
+known bugs ---- the filter function that clips grids sometimes seems to shift
+                the new grids a tiny bit in coordinate space (as if there was
+                some round-off error, but with double precision the round-off
+                shouldn't be noticable?)
+           ---- the power function (and perhaps some of the others) doesn't handle 
+                divide by zero situations properly yet (e.g. x^(-1), when x=0.
+           ---- the 2Dcluster function operates 'illegally' --- it adds new grids
+                to a "clusters" register regardless of the "New name" field,
+                and doesn't clear any existing grids in "clusters". 
+
+Send to local view and the DV local view window
+-----------------------------------------------
+
+The local view shows 3D surface plots of 2D uniform grids. The "options"
+button on the main window opens a dialog box with several options controlling
+how these surfaces are built. The "options" menu  on the "DV local view" window
+controls how surfaces are drawn, *after* they have been built and sent. 
+In other words, if send-options are changed, the grids need to be re-sent for
+the options to take effect, however options-menu selections take effect immediately.
+
+send options:
+-------------
+
+   scale --- changes height of the surface
+             use 'R#' to specify a height relative to the largest horizontal
+             dimension of the data. For example 'R0.5' chooses a scale factor
+             so that the maximum vertical dimension of the surface is 1/2 that
+             of the maximum horizontal dimension. 
+
+   z-clip min/max --- adds clipping planes at the specified locations, i.e.
+             nothing below zmin or above zmax will be displayed.
+
+   colormap range --- the smaller/larger value of the grid function that gets
+             mapped to the corresponding minimum/maximum value in the colormap
+             range. If a field is left empty, then the corresponding
+             minimum/maximum value of the function is used.
+
+   colormap type --- when a logarthmic map is chosen, then the range is
+             interpreted as the smallest/largest absolute magnitude of the
+             function. Use Log+ for positive functions, Log- for negative,
+             and Log+- for indefinite functions (in this case the upper half of the
+             colormap gets used for positive values, the lower half for
+             negative).
+
+   Mask and filter operate as described in the "Functions" dialog. 
+             Grid points masked or filtered out do not get drawn. 
+             If Mask="*", then the function masks itself. If the mask name is 
+             preceded by a forward-slash (/), then the DV is searched for a 
+             mask register with a similar name to the grid being sent, except 
+             that the middle part of the name is replace by the rest of the mask. 
+             For example, with Mask="/chr", the register "gr_phi_0" would get 
+             masked by "gr_chr_0".
+
+             NOTE: currently, a filter only works when either the "concat. same time"
+                   or "concatenate all" option described below is selected.
+
+   coarsen --- N:1 coarsening of the data, for quicker rendering.
+   
+   sync by time index/sync by time value --- when multiple registers are sent,
+             this option controls the order in which grids are sent. 
+             In the main browser list, times are shown as "t(10)=2.345", for 
+             example. 10 is the time-index in this case, 2.345 the time-value.
+
+   no concatenation/concat. same time/concatenate all
+             no concatenation --- all grids sent are drawn 1 at a time
+             concat. same time --- grids that share the same time index
+             or value (as specified by the preceeding parameter) get drawn
+             at the same time.
+             concatenate all --- all grids sent are drawn on the same view.
+
+   AMR --- When turned on, this button will mask out the shape of any child
+           grids (i.e. higher level numbers/finer resolution) that might exist 
+           for a given grid. Use this option when sending an AMR hierarchy if
+           you only want to see the finest data available at any point.
+
+   The "history" buttons at various locations record a brief history of the
+   corresponding dialog enteries, for convenience (though when the buffer is 
+   filled, the history is cleared, not 'shifted').
+
+Local view operation and options:
+---------------------------------  
+
+The view is controlled via the mouse, with a track-ball emulation and controls
+similar to that of explorer. For example, the left MB rotates, the middle MB
+translates, and left+middle MB zooms.
+
+The "Home" button resets the view with the specified zoom/theta/phi parameters.
+The corresponding zoom/theta/phi buttons record a history of recent paramaters,
+like the send option history buttons. 
+
+Annotation --- see the defaults for examples on the format of on-screen text
+               strings.
+
+               Note : when text or the colormap is interactively placed on the GL 
+                     canvas, the *entire* canvas is redrawn with each
+                     repositioning, including any grids that are displayed. So 
+                     for speed, alter the on screen annotation with a coarsened 
+                     version of the data.
+
+Screen Capture ---- this dialog can be used to save snapshots of the view
+               to disk in jpeg format. Note that *every* redraw of the GL
+               canvas will be saved after "Start Capture" is selected, so even
+               though the canvas window doesn't have to be on top, if you
+               move other windows over it, the canvas will get refresh messages and
+               save multiple snapshots of the view.
+           
+               known bugs --- The screen capture "Browse" button doesn't work reliably yet,
+                             and can crash the DV.
+
+known bugs --- the surface-normal calculation isn't working properly at the 
+               edges of grids, and so AMR data drawn with the "Smooth Solid"
+               mode may show artificial seams between adjacent grids. 
+

@@ -1,0 +1,155 @@
+#!/bin/sh
+
+trace="false"
+
+ctrl_c_trap()
+{
+   dvrcomm "exit"
+   exit 1
+}
+
+Usage() {
+cat<<END
+
+Routes a single grid function, with filtering, to DV.
+
+Usage: sdftodv_f oname [-g 'givec'] [-c N] [-a] [-i 'ivec'] [-s] file1 file2 ...
+
+ oname -- output register name
+ -g -- generalized index vector givec
+ -c -- 2^N:1 coarsening ... N is an integer greater than 0
+ -a -- if selected, sends *all* files to DVR *before* applying filter and routing;
+       otherwise (default), files routed one by one.
+       This option is needed for the level ("l=...") and time ("t=...") portions
+       of givec to make sense.
+ -i -- passed to sdftodv
+ -s -- passed to sdftodv
+
+ order of the optional arguments is arbitrary, but oname must be first, 
+ and the sdf files must come at the end
+
+NOTE: this program sets DVRHOST to `hostname`, 
+      and starts and stops DVR on the local machine
+
+END
+}
+
+route()
+{ 
+   if test $givec != "NULL"
+   then
+      dvrcomm "__tmp__oname = $oname"
+      dvrcomm "delete $oname"
+      dvrcomm "__tmp__oname > $oname"
+   fi
+   if test $N -ge 1
+   then
+      dvrcomm "filter = ''"
+      for j in `seq 1 1 $N`
+      do
+         dvrcomm "__tmp__oname = coarsen($oname)"
+         dvrcomm "delete $oname"
+         dvrcomm "__tmp__oname > $oname"
+      done
+      if test $givec != "NULL"
+      then
+         dvrcomm "filter = '$givec'"
+      fi
+   fi
+   dvrcomm "route $oname"
+   dvrcomm "delete $oname"
+}
+
+num=0
+snum=2
+
+case $# in
+0) Usage;;
+1) Usage;;
+*) oname=$1
+   all="false"
+   ivec1=""
+   ivec2="NULL"
+   givec="NULL"
+   s=""
+   get_ivec2="false"
+   get_givec="false"
+   get_N="false"
+   N=0
+   for i in $@
+   do
+      num=`expr $num + 1`
+      if test $get_ivec2 = "true"
+      then
+         ivec2=$i
+         get_ivec2="false"
+      fi
+      if test $get_givec = "true"
+      then
+         givec=$i
+         get_givec="false"
+      fi
+      if test $get_N = "true"
+      then
+         N=$i
+         get_N="false"
+      fi
+      case $i in 
+        "-a") all="true"; snum=`expr $num + 1`;;
+        "-s") s="-s"; snum=`expr $num + 1`;;
+        "-i") ivec1="-i"; get_ivec2="true"; snum=`expr $num + 2`;;
+        "-g") get_givec="true"; snum=`expr $num + 2`;;
+        "-c") get_N="true"; snum=`expr $num + 2`;;
+        *);;
+      esac
+   done
+
+   if test $trace = "true"
+   then
+      echo "oname =" $oname
+      echo "givec =" $givec
+      echo "all =" $all
+      echo "N =" $N
+      echo "sdftodv options =" "-r" $s $ivec1 '$ivec2'
+   fi
+
+   DVRHOST=`hostname`
+   export DVRHOST
+   DVR&
+   trap ctrl_c_trap 2
+
+   # give DVR time to set up it's input port
+   sleep 1
+
+   if test $givec != "NULL"
+   then
+      dvrcomm "filter = '$givec'"
+   fi
+   num=1
+   for i in $@
+   do
+      if test $num -ge $snum
+      then
+         if test $trace = "true"
+         then
+            echo "executing: sdftodv -r -n $oname $a $s $ivec1 '$ivec2' $i"
+         fi
+         if test $ivec2 = "NULL"
+         then
+            sdftodv -r -n $oname $a $s $i
+         else
+            sdftodv -r -n $oname $a $s $ivec1 "$ivec2" $i
+         fi
+         if test $all = "false"
+         then
+            route
+         fi
+      fi
+      num=`expr $num + 1`
+   done 
+   if test $all = "true"
+   then
+      route
+   fi
+   dvrcomm "exit"
+esac

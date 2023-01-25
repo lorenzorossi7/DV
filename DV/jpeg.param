@@ -1,0 +1,55 @@
+#info -- laptop is 800x600 --- using 768x576
+
+# see template.param in the mpeg_encode distribution for some
+# comments. See also the users guide.
+
+PATTERN		IBBPBBPBBP
+#PATTERN		IBBPBBPBBPBBPBBP
+OUTPUT	   tmp.mpg
+BASE_FILE_FORMAT	JPEG
+INPUT_CONVERT	*
+GOP_SIZE	16
+SLICES_PER_FRAME	1
+INPUT_DIR tmp
+INPUT 
+scr_save_*.jpeg	[0-11]
+END_INPUT
+
+# this must be one of {HALF, FULL}
+PIXEL		HALF
+RANGE		10
+
+# this must be one of {EXHAUSTIVE, SUBSAMPLE, LOGARITHMIC}
+PSEARCH_ALG	LOGARITHMIC
+
+# this must be one of {SIMPLE, CROSS2, EXHAUSTIVE}
+BSEARCH_ALG	CROSS2
+
+#
+# these specify the q-scale for I, P, and B frames
+# (values must be between 1 and 31)
+# These are the Qscale values for the entire frame in variable bit-rate
+# mode, and starting points (but not important) for constant bit rate
+#
+#IQSCALE		8
+#PQSCALE		10
+#BQSCALE		25
+IQSCALE		1
+PQSCALE		1
+BQSCALE		1
+
+# this must be ORIGINAL or DECODED
+REFERENCE_FRAME	ORIGINAL
+
+# if you want constant bit-rate mode, specify it as follows (number is bits/sec):
+#BIT_RATE  5000000
+#BIT_RATE  2000000
+
+# To specify the buffer size (327680 is default, measused in bits, for 16bit words)
+#BUFFER_SIZE 3276800
+
+# The frame rate is the number of frames/second (legal values:
+# 23.976, 24, 25, 29.97, 30, 50 ,59.94, 60
+FRAME_RATE 30
+
+FORCE_ENCODE_LAST_FRAME

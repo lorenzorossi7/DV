@@ -1,0 +1,69 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+#LIBS       = @LIBS@ 
+LIBS       = @LIBS@ @LIBGL@ 
+LDFLAGS    = @LDFLAGS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @DEFS@ -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	@CC_TRANSFORM@ $*.c > $*_.c
+	$(CC_COMP) -c $*_.c
+	mv $*_.o $*.o
+
+OBJS = DV_gui.o DV_forms.o
+
+all: $(OBJS)
+
+DV_gui.o: DV_forms.h DV_gui.c ../DVault.h ../vis/send_bbh_xyz.h ../fncs.h ../misc.h ../reg.h ../vis/send_accept_sdf.h func_table.h ../vis/send_gl_canvas.h
+	@CC_TRANSFORM@ DV_gui.c > DV_gui_.c
+	$(CC_COMP) -c DV_gui_.c
+	mv DV_gui_.o DV_gui.o
+
+DV_forms.c: DV_forms.fd
+	sed -i 's/#include "forms.h"/#include "myforms.h"/' DV_forms.c
+
+DV_forms.o: DV_forms.h DV_forms.c
+	@CC_TRANSFORM@ DV_forms.c > DV_forms_.c
+	$(CC_COMP) -c DV_forms_.c
+	mv DV_forms_.o DV_forms.o
+
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

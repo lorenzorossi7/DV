@@ -1,0 +1,181 @@
+The following offers a very brief description of DVR, the 'remote' 
+version of DV, and how to control it via the DV_calc langauge.
+
+DV_calc
+=======
+
+A DV_calc program is a sequence of statements seperated by semi-colons.
+Programs can currently be sent to DV via the command "dvcomm <program>",
+and to DVR via "dvrcomm <program>" (for more information see DVR below).
+
+In expressions, simple names (i.e. those starting with 
+an alphabetic character or underscore, followed by alphanumeric characters 
+and/or underscores) can be entered without quotes, otherwise
+the name must be enclosed by single or double quotes.
+
+The current working grammar includes the following functions:
+
+Assignment 
+----------
+
+   REGISTER = EXPRESSION ;
+
+   eg., to coarsen 'phi':
+   
+   phi_c = coarsen(phi);
+
+For EXPRESSION, the parser will accept a standard infix expression, however
+at this stage *no* arithmetic operators are implemented, and
+the *only* function that works is 'coarsen(register)', which does
+a 2:1 coarsening of the register.
+The utility of assignment at this stage then is to create copies
+of grid functions with optional filtering (see 'Filters' below).
+
+Renaming
+--------
+
+   OLD_REGISTER_NAME > NEW_REGISTER_NAME;
+
+   eg., to rename 'y' as 'x':
+
+   y > x;
+
+Specifying a Mask
+-----------------
+
+   mask = REGISTER;
+   mask_val = CONSTANT;
+
+   eg., to set register 'chr' as the mask with value 1:
+
+   mask = chr; mask_val = 1;
+
+   eg., to stop using a mask:
+
+   mask = '';
+
+Specifying a Filter 
+-------------------
+
+   filter = GIVEC;
+
+   eg., to use the generalized index vector 'cb=-1,1 ; l=1-7/2' for all
+   subsequent assignment operations:
+
+   filter = 'cb=-1,1 ; l=1-7/2';
+
+   eg., to stop using any preceeding filter:
+
+   filter = '';
+
+Loading an sdf file from disk
+-----------------------------
+
+   load FILENAME > REGISTER;
+   
+   or 
+
+   load FILENAME;
+
+   eg., to load the file "DV/data/2d_example.sdf" to register phi:
+
+   load "DV/data/2d_example.sdf" > phi;
+
+Saving a register to disk
+-------------------------
+
+   save REGISTER > FILENAME;
+
+   eg., to save register phi to "/tmp/phi.sdf",
+
+   save phi > "/tmp/phi.sdf";
+
+Deleting a register
+-------------------
+
+   delete REGISTER;
+
+Routing a register to DV or DVR
+-------------------------------
+  
+   route REGISTER;
+
+(see DVR below)
+
+Stopping the remote server
+--------------------------
+
+   exit;
+
+NOTE: only DVR can be stopped like this ... DV (with the GUI)
+must be shut down from the GUI
+
+DVR
+===
+
+DVR is a version of DV without the GUI. It listens for requests
+on the port specified by environment variable DVRPORT (default 5006).
+sdf files can be sent to it by using the '-r' option of 'sdftodv';
+then, sdftodv will send sdf files to the combination DVRHOST/DVRPORT
+(of course you could also simply define DVHOST/DVPORT to point
+to the remote server location/port, and then not use the '-r' option).
+Commands are send to DVR via 'dvrcomm' (the original GUI version of DV
+can also be controlled using the command line with 'dvcomm' ... the
+only command that doesn't work with the GUI is 'exit').
+
+Another difference between DV and DVR is the operation of the 'route'
+command. When DVR receives a route instruction, it will stream
+the corresponding register to DVHOST/DVPORT; while DV routes
+registers to DVRHOST/DVRPORT. The motivation for this command
+was to have a remote (i.e. on the off-site machine that's running
+the code producing the sdfs) version of DV that could perform operations
+locally before routing pieces (or all) of the data to the desktop DV
+where the data is visualized. 
+
+An example of how DVR/DV can be utilized in combination with the
+DV_calc language is the 'sdftodv_f' program, which is a shell script
+in DV/bin. The following is the current usage statement for sdftodv_f:
+
+-------------------------------------------------------------------------------
+
+Routes a single grid function, with filtering, to DV.
+
+Usage: sdftodv_f oname [-g 'givec'] [-c N] [-a] [-i 'ivec'] [-s] file1 file2 ...
+
+ oname -- output register name
+ -g -- generalized index vector givec
+ -c -- 2^N:1 coarsening ... N is an integer greater than 0
+ -a -- if selected, sends *all* files to DVR *before* applying filter and routing;
+       otherwise (default), files routed one by one.
+       This option is needed for the level ("l=...") and time ("t=...") portions
+       of givec to make sense.
+ -i -- passed to sdftodv
+ -s -- passed to sdftodv
+
+ order of the optional arguments is arbitrary, but oname must be first,
+ and the sdf files must come at the end
+
+NOTE: this program sets DVRHOST to ca-arcdca-cuda1-c1i-144.arcdca.adelphia.net,
+      and starts and stops DVR on the local machine
+
+-------------------------------------------------------------------------------
+
+In otherwords, sdftodv_f sends a single grid function to DV with optional
+filtering and/or coarsening of the data. 
+
+For example, say you have a 3D grid function 'phi', produced in
+a parallel run with 32 nodes, and saved to the local disk in the
+files phi_1.sdf, phi_2.sdf, ... , phi_32.sdf, and you want to sent
+an x=0 slice of the data to DV (assuming the domain of the data is
+[-1,1,-1,1,-1,1] in [x,y,z]). On the remote machine where the
+data resides, set DVHOST to the local machine where DV is running.
+Then, from the remote machine, enter
+
+$> sdftodv_f phi -g 'cb=0,0,-1,1,-1,1' *phi*
+
+This will start DVR, then one-by-one send the phi_#.sdf files to it,
+apply the filter, and route the sliced data to DV. Afterwards, it
+will shutdown DVR.
+
+See the sdftodv_f code for more details on how it operates, and 
+thus how to write similar scripts for your own needs.

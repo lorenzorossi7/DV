@@ -1,0 +1,81 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+#CLIBS     = -lbbhutil -lsv $(SYSLIB) -lforms -lpthread -lbbh_xyz_stream -lcliser $(CLISERLIB) -lDVCliser -lutilio -lg2c -ljpeg
+LIBGL    =  @LIBGL@
+
+LIBS       = @LIBS@ $(LIBGL)
+LDFLAGS    = @LDFLAGS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @DEFS@ -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	@CC_TRANSFORM@ $*.c > $*_.c
+	$(CC_COMP) -c $*_.c
+	mv $*_.o $*.o
+
+OBJS = send_accept_sdf.o send_bbh_xyz.o send_gl_canvas.o scr_save.o 
+
+all: $(OBJS)
+
+send_accept_sdf.o: ../DVault.h ../reg.h send_accept_sdf.h send_accept_sdf.c
+	@CC_TRANSFORM@ send_accept_sdf.c > send_accept_sdf_.c
+	$(CC_COMP) -c send_accept_sdf_.c
+	mv send_accept_sdf_.o send_accept_sdf.o
+
+send_gl_canvas.o: ../DVault.h ../reg.h send_gl_canvas.h send_gl_canvas.c scr_save.h
+	@CC_TRANSFORM@ send_gl_canvas.c > send_gl_canvas_.c
+	$(CC_COMP) -c send_gl_canvas_.c
+	mv send_gl_canvas_.o send_gl_canvas.o
+
+send_bbh_xyz.o: ../DVault.h ../reg.h send_bbh_xyz.h send_bbh_xyz.c
+	@CC_TRANSFORM@ send_bbh_xyz.c > send_bbh_xyz_.c
+	$(CC_COMP) -c send_bbh_xyz_.c
+	mv send_bbh_xyz_.o send_bbh_xyz.o
+
+scr_save.o: scr_save.h
+	@CC_TRANSFORM@ scr_save.c > scr_save_.c
+	$(CC_COMP) -c scr_save_.c
+	mv scr_save_.o scr_save.o
+
+#ncar_out.o: ncar_out.h
+#	$(CC_COMP) -DSYSV -D_POSIX_SOURCE -D_XOPEN_SOURCE -DByteSwapped -DNeedFuncProto -O -c ncar_out.c 
+ 
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

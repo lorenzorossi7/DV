@@ -1,0 +1,47 @@
+.IGNORE:
+
+prefix  = @prefix@
+
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
+includedir = $(prefix)/include
+
+BBH_SYSTEM = @BBH_SYSTEM@
+
+CC     = @CC@
+AR     = @AR@
+RANLIB = @RANLIB@
+PERL   = @PERL@
+RPCGEN = @RPCGEN@
+CTOF   = @CTOF@
+
+LIBS       = @LIBS@
+LDFLAGS    = @LDFLAGS@ -L. 
+CPPFLAGS   = @CPPFLAGS@ @DEFS@ 
+CFLAGS     = @CFLAGS@
+DEFS       = @DEFS@ @BBH_DEFS@
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+CC_COMP    = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD    = $(CC) $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+all: libDVCliser.a 
+
+.c.o:
+	$(CC_COMP) -c $*.c
+
+libDVCliser.a: DVCliser.o 
+	$(AR) r libDVCliser.a DVCliser.o
+	$(RANLIB) libDVCliser.a
+
+########################################################################
+# Clean-up
+########################################################################
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *.a > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

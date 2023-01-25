@@ -1,0 +1,42 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Sending data using "sdftodv"
+<hr WIDTH="100%"></h2></center>
+Once DV is running, the easiest way to load data is by using the <b>sdftodv</b>
+command, which sends data files that are in the <b>SDF</b> file format
+to the DV server. Prior to using sdftodv from a remote location, one needs
+to specify the internet address of the machine on which DV is running,
+for example:
+<p><tt>> setenv DVHOST bh8.physics.ubc.ca</tt>
+<p>Also, if the DV was started with a port number other than the default
+of 5005, one must set the DVPORT environment variable as was done when
+<a href="sec_1.html">starting
+the DV.</a>
+<p>The simplest usage for sdftodv is
+<p><tt>> sdftodv [-i 'ivec'] &lt;sdf_file_name> ...</tt>
+<p>The 'ivec' is an optional index vector, that can be used to control
+which data sets within the sdf files are to be sent.&nbsp; For example
+<p><tt>> sdftodv ./DV/data/2d_example.sdf</tt>
+<p>will send the entire file '2d_example.sdf' (which is located in the
+'data' subdirectory of the standard DV distribution). To send the first
+3 data sets, followed by the remaining even numbered ones from 6 onwards,
+enter
+<p><tt>> sdftodv&nbsp; -i '1-3,4-*/2' ./DV/data/2d_example.sdf</tt>
+<p>Note that the entire index vector must be placed in quotes to prevent
+the shell from interpreting any special characters.
+<p>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="sec_1.html">Previous</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="sec_3.html">Next</a>
+</body>
+</html>

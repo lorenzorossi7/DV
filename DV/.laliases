@@ -1,0 +1,3 @@
+a u 'cvs -r update'
+a c 'cvs commit -m ""'
+cala

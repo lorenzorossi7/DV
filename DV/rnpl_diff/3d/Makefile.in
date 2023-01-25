@@ -1,0 +1,69 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+RNPL = @RNPL@
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+LIBS       = @LIBS@ 
+LDFLAGS    = @LDFLAGS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @DEFS@ -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	$(CC_COMP) -c $*.c
+
+all: updates_f3.o
+
+diff_3d_rnpl: diff_3d_rnpl.ex
+	rm diff_3d_rnpl > /dev/null 2>&1
+	($(PERL) $(DV_HOME)/bin/ex_pp diff_3d_rnpl.ex diff_3d_rnpl)
+
+updates_f3.o: updates_f3.f
+
+updates_f3.f: diff_3d_rnpl
+	$(RNPL) -l allf diff_3d_rnpl
+	mv updates.f tmp 
+	sed -e "s/update/upd_f3/" tmp > updates_f3.f
+	rm tmp
+	rm diff_3d.f initializers.f residuals.f sys_param.inc gfuni0.inc diff_3d_init.f other_glbs.inc
+
+clean:
+	rm *.o > /dev/null 2>&1
+	rm updates_f3.f globals.inc > /dev/null 2>&1
+	rm .rnpl.attributes > /dev/null 2>&1
+	rm diff_3d_rnpl > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *_.c > /dev/null 2>&1
+	ev/null 2>&1
+	rm Makefile > /dev/null 2>&1

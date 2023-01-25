@@ -1,0 +1,125 @@
+trackball:
+----------
+adjust the +- z_translate to properly handle close zooms
+(at the very least let the translate go to the z=0 plane,
+ if your're not going to make it data-sensitive)
+
+visualization:
+--------------
+check if initial 3D slice is out of range with a new sdf,
+and adjust accordingly
+
+fix text-vanishing bug --- when view is closed and re-opened
+
+fix curvilinear norm calc
+when resizing, change annotation coords as well
+colormap editor
+auto-resend option when gc_opts parameter is modified
+handle zscale=0 better
+filters
+   --- have at least 2 types of filters
+       (i) -- general grid-in   -->  grid(s)-out
+       (ii) -- 'stream' filter that just alters a data stream,  
+               e.g. to filter out nan's
+add thinning mode
+fix hidden line
+multiple windows
+add shininess options
+add lighting options
+spin 1D/2D data
+add axis
+with text-support -- deal with xforms control characters spoiling the pop-up entries
+loading options --- problems with setting border color gadget
+include support for user defined variables on the input screen ---
+   i.e. reading a file with [t,var] pairs, eg. [t,mass]. etc.
+need level coloring option --- i.e. have a *colormap* per level
+need finer render-opts/conversion-opts/etc control -- eg. set register by
+   register to have ungrid verison wireframe, AMR version solid, etc ...
+make gui report global register level
+minimum data-browser size bug
+add support for a coloring via a second register (i.e. same colormap ranges,
+   etc, but second grid values are used to map to a color)
+
+animation:
+----------
+add an extra thread (or something similar --- idle call-back, as Matt
+suggested)
+
+screen capture:
+---------------
+interprate ~
+consistant file browser selection 
+
+lnx:
+----
+Why does it take so long to open a canvas?
+
+dv:
+---
+
+Fix bug when sending data in the middle of apply_gf(extend)
+
+I bet doing coords(coords) will case a dead-lock,
+   --- if an explicit name isn't given, append the coord to 
+       the current register name, or something
+! FIX adjusting t coordinate --- changes source register's t as well!!
+
+when cloning with cordinate bounding box, may be a bug in the splicing
+routine, as sometimes coordinates seem to get shifted by a small
+amount (or could just be lack of precision)
+see sdfs/clone_bug.sdf  --- clone with "cb=0,1.0938,-1.4062,1.4062"
+
+the power function isn't dealing with infinities/nan's that are produced.
+
+add 2PT time derivative option
+
+port to other machines!
+-----------------------
+
+sdftodv
+-------
+
+crashes with non-uniform data --- should exit gracefully
+
+nodes for new upgrades:
+-----------------------
+
+documentation
+
+changed behavior of cb, to handle slices
+
+install script for DVR ... don't need forms, etc.
+
+reasonably verbose output
+
+need:
+   arithmetic support, more langauge features (customizable functions, or
+   perhaps an interface to Martin's function tool)
+
+   compiling without forms/gui ... westgrid
+
+   GUI interface to DV_calc
+
+   re. mechanism for sending programs via sdf filenames
+
+   better syntax error reporting
+
+   options to remove/increase verbosity of output
+
+   suggestions for enhancements/filters/functions/etc.
+
+   can work with 'mega' data sets? (i.e. use blocks of '-i' s ?)
+   --eg ... convert a register to uniform/unigrid currently
+   requires the -a option ... no good for massive files.
+   could slice then covert, but ?
+
+   with proper shell scripting can make DVR do 'trivially parallelizable'
+   operations ... still no infrastructure for full parallel operations.
+
+   have not addressed strict grid comparison yet. perhaps can link into
+   PAMR, to allow one to for instance compose() using the structure
+   of A, then 'regrid' to the structure of B. or recompose to 
+   sgh's. 
+   (but PAMR can only interpolate 1 'level', so if structures are very
+   different this won't work).
+   

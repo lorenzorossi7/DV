@@ -1,0 +1,87 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Send to local view options
+<hr WIDTH="100%"></h2></center>
+<img SRC="local_view_options.jpg" height=316 width=538>
+<p><b>Local view&nbsp;|&nbsp;HSV</b>:&nbsp;the widget at the top of the
+screen is used to specify which GL&nbsp;canvas, i.e. the 2D local view
+or the 3D slicer ("HSV"), to which the entered options will be applied.
+<p><b>scale</b>:&nbsp;the scale factor by which to multiply grid function
+values to determine the height of the 2D surface plot. A <i>relative</i>
+scale can be specified using the notation <b>R#</b>,&nbsp; where <b># </b>is
+the desired value. A relative scale adjusts the height of the surface to
+be the specified fraction of the maximum width (coordinate domain) of the
+data. For example, setting scale to <b>R.1 </b>will cause the height of
+surface to be 0.1 times (10%) the width of the surface.
+<p><b>z-clip min/max</b>: function values above the specified minimum and
+maximum are clipped
+<p><b>colormap min/max</b>:&nbsp;the minimum/maximum function values that
+will be mapped to the minimum/maximum color indices in the surface-height
+colormap. If left blank, then the global minimum/maximum function values
+at the given time are used.
+<p><b>3D clip</b>: if selected, then points that fall outside of the colormap
+range are not drawn in the 3D slicer window.
+<p><b>Linear | Log +- | Log + | Log-</b>: the type of function to use when
+mapping function values to the colormap.
+<p><b>Standard | B&amp;W | W&amp;B</b>: the color scheme to use (will be
+expanded or made customizable in the future).
+<p><b>mask</b>:&nbsp;when selected, a register, specified via the text
+widget to the right, should be used to mask out excised/undefined function
+values (as specified by the <b>value</b> widget). Function values that
+are masked out will not be drawn. Two special cases for the mask register
+are allowed: 1. an asterisk (<b>*</b>)&nbsp;means that the current function
+that is being visualized should act as its own mask (this is useful for
+grid functions where excised regions are set to a specific numerical value);
+2. A forward slash (<b>/</b>) means that the subsequent text is to be interpreted
+as a <i>tag</i>, and a register should be searched for that matches the
+name of the register that is being viewed, except that a portion of its
+named should be replaced with the tag. For example, if the mask register
+is <b>2d_chr</b>, then specifying a mask <b>/chr</b> will allow <b>2d_chr</b>
+to be used as the mask for registers with names like <b>2d_phi</b>, <b>2d_pi</b>,
+<b>2d_f</b>, etc. Note that the mask register and register(s)&nbsp;being
+displayed must have identical grid structure.
+<p><b>filter</b>:&nbsp;when selected, a filter, as explained for use with
+<a href="sec_33.html#Other_functions">functions</a>, can be used to select
+a subset of a register to view.
+<p><b>coarsen</b>: applies uniform coarsening (by the specified amount)
+to registers before visualization, to speed up the display of high-resolution
+grid functions on slower machines.
+<p><b>sync by time index | sync by time value</b> :&nbsp;when animating
+multiple registers simultaneously, this option specifies whether to used
+the integer time levels of the register (starting at 1), or the actual
+real times of corresponding time levels to synchronize the display. This
+option is only interpreted when <b>concat. same time</b> is selected.
+<p><b>no concatenation&nbsp;|&nbsp;concat. same time |&nbsp;concatenate
+all</b> :&nbsp;this option allows one to choose whether/how multiple grids
+are displayed simultaneously (when <b>concat. same time</b> is selected,
+the definition of "same time" is controlled by the <b>sync by ...</b> options
+above).
+<p><b>monotone shading</b>: this option disables the colormap, and draws
+surfaces with a single color that can be specified by via the <b>color</b>
+button to the right.
+<p><b>level(dx) coloring</b>: this option causes the grid function resolution
+(specifically the resolution in the first, or x dimension) to be used to
+define the surface color.<b></b>
+<p><b>AMR</b>:&nbsp;this option causes finer resolution (higher level)
+grids to mask out coarser level grids of the same register, in the region
+of overlap between the grids. This is useful for visualizing grid hierarchies,
+like those produced using adaptive mesh refinement.
+<p><b>ignore c.c</b>: this option forces the surface generation procedure
+to ignore any curvilinear coordinate information that may be associated
+with a grid, displaying the surface with a uniform grid whose bounding
+box matches that of the curvilinear coordinate domain.
+<p><b>3D b.b only</b>:&nbsp;if selected then only render bounding box information
+in the 3D slicer window.
+<p>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>
+</body>
+</html>

@@ -1,0 +1,73 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(configure.in)
+
+DV_HOME=`pwd`
+AC_SUBST(DV_HOME)
+
+dnl Determine system type
+BBH_SYS_GETSYSTEM
+
+dnl Checks for programs.
+
+AC_CHECK_PROG(PERL,perl,perl,no)
+if test "$PERL" != perl; then
+AC_MSG_ERROR(Fortran interface requires Perl. ftp://mrcnext.cso.uiuc.edu/pub/gnu/perl-4.036.tar.gz)
+fi
+AC_CHECK_PROG(RANLIB,ranlib,ranlib,touch)
+AC_CHECK_PROG(AR,ar,ar,touch)
+AC_CHECK_PROG(RPCGEN,rpcgen,rpcgen,no)
+AC_CHECK_PROG(RNPL,rnpl,rnpl,no)
+AC_PROG_CC
+
+
+dnl Set up Fortran environment
+BBH_F77_CONFIGURE
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl Define directories in which to look for header files
+IP="$INCLUDE_PATHS /usr/include/X11 /usr/X11R6/include /usr/X11R6/include/X11 /usr/include /usr/local/include /sw/include /opt/local/include $HOME/include"
+BBH_CHECK_HEADERS("sdf.h cliser.h bbhutil.h","$IP",APP_INCLUDE_PATHS,yes)
+BBH_CHECK_HEADERS("forms.h GL/gl.h GL/glx.h","$IP",APP_INCLUDE_PATHS)
+AC_SUBST(APP_INCLUDE_PATHS)
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS(strdup)
+
+
+dnl Define directories in which to look for libraries 
+LP="$LIB_PATHS /usr/lib64 /usr/lib /usr/local/lib /usr/X11R6/lib /usr/lib/X11 /sw/lib /opt/local/lib $HOME/lib"
+BBH_CHECK_LIBS("bbhutil cliser utilio","$LP",APP_LIB_PATHS,LIBS,yes)
+BBH_CHECK_LIBS("pthread jpeg formsGL forms","$LP",APP_LIB_PATHS,LIBS)
+
+AC_SUBST(APP_LIB_PATHS)
+
+
+dnl Check for headers and libraries needed for sdftodv
+BBH_CHECK_HEADERS("bbhutil.h cliser.h","$IP",SDFTODV_INCLUDE_PATHS,yes)
+BBH_CHECK_LIBS("bbhutil cliser","$LP",SDFTODV_LIB_PATHS,SDFTODV_LIBS,yes)
+
+
+AC_SUBST(SDFTODV_INCLUDE_PATHS)
+AC_SUBST(SDFTODV_LIB_PATHS)
+AC_SUBST(SDFTODV_LIBS)
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_BIGENDIAN
+
+
+AC_OUTPUT(
+          Makefile
+          DV_gui/Makefile
+          util/Makefile
+          vis/Makefile
+          DVCliser/Makefile
+          rnpl_diff/1d/Makefile
+          rnpl_diff/2d/Makefile
+          rnpl_diff/3d/Makefile
+          misc_f77/Makefile
+          DV_calc/Makefile
+         )

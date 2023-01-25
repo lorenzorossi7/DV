@@ -1,0 +1,155 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Manipulating the contents of registers
+<hr WIDTH="100%"></h2></center>
+
+<h2>
+<a NAME="deleting_items"></a>Deleting items</h2>
+To delete registers, or individual grids/levels/times, select the corresponding
+items on the DV main window using the left mouse button, then click on
+the <b>Delete</b> button. For example, in the following we wish to delete
+register <b>2d_pi_0</b> and times 2-6 of register <b>lambda</b>:
+<p><img SRC="DV_main_5.jpg" height=496 width=638>
+<p>After clicking on <b>Delete</b>, the following sub-window should pop-up:
+<p><img SRC="DV_main_5_inset.jpg" height=124 width=243>
+<p>Clicking on <b>Selected and Open</b> or <b>Selected</b> will delete
+the desired items. An "open" item is one that is visible on the DV main
+window. For example,&nbsp; <b>lambda</b>'s list of times are open in the
+above screen shot. Double clicking on lambda will "close" the list of times,
+however, any selected times will remain selected; hence the distinction
+between the first 2 delete statements. <b>Delete All</b> will delete <i>all</i>
+registers, regardless of which are selected. <b>Delete Last Time-Step of
+Selected Registers</b> will delete the last time step of any <i>registers</i>
+that are selected (this function is useful because the last time step of
+an sdf file that is being produced by a program that is still running may
+be incomplete due to disk buffering, and hence the last time step may contain
+garbled data).
+<br>
+<hr WIDTH="100%">
+<h2>
+<a NAME="merging_registers"></a>Merging Registers</h2>
+The <b>Merge</b> button on the main window can be used to collate the contents
+of different <i>registers</i>. This is useful for parallel applications
+that save different portions of the same grid function to separate files
+on local machines. Then, after all the pieces of a grid are sent to the
+DV from the various remote locations, they can be merged into a single
+register. <b>Merge</b> is used in a similar manner to
+<b>Delete</b> described
+above.
+<p><b>WARNING</b>:&nbsp; DV requires that all grids within a given register
+be <i>unique</i>. Here, unique means that at least one of the following
+attributes must be different between any two grids within a register: time,
+resolution(level) and the coordinate domain occupied by the grid. Therefore,
+if you merge registers that contain identical grids (i.e. non unique as
+just defined), DV will discard all but one of the identical grids.
+<br>
+<hr WIDTH="100%">
+<h2>
+<a NAME="differentiation"></a>Differentiation</h2>
+The DV can calculate certain numerical derivatives of uniform grid functions.
+Clicking on Differentiate in the main window will bring up the following
+window:
+<p><img SRC="diff_1.jpg" height=326 width=568>
+<p>All registers currently in the DV are shown in both the <b>Differentiate</b>
+list on the left (where one selects the register to differentiate), and
+the
+<b>mask</b> list on the right (where an optional "mask" register can
+be selected) . The <b>w.r.t</b> choice box is used to select which coordinate
+to differentiate with respect to. The default coordinate names are <b>t
+</b>for
+time, and <b>x1</b>,<b>x2</b>,<b>x3</b> for the first three spatial coordinates.
+The particular finite difference stencil to use for spatial differences
+is specified via the spatial stencil choice box (currently only 2 second
+order accurate operators are provided). The current temporal difference
+stencil is leap-frog at interior times, and standard second order accurate
+forward and backward stencils applied to the first and last time of a register
+respectively.
+<p>The optional mask register can be used to specify an <i>excised region</i>
+where grid function values are to be interpreted as undefined. The mask
+register must have an identical structure compared to the&nbsp; register
+being differentiated, and the region of the computational domain that is
+treated as undefined are all grid locations where the mask grid function
+has a numerical value equal to <b>mask value</b>. Standard second order
+accurate forward and backward difference stencils are applied adjacent
+to excised regions, as required not to reference undefined function values.
+<p>The optional filter argument allows one to select portions of a register
+to operate on, and is explained in the <a href="#Other_functions">other
+functions</a> section below.
+<p>When <b>Go!</b> is clicked, a new register with name specified by <b>new
+name</b> will be created containing the result of the differentiation.
+If the <b>over-write existing registers?</b> button is <i>not</i> selected,
+then a warning prompt will be issued if a register with the name <b>new
+name</b> already exists.
+<br>
+<hr WIDTH="100%">
+<h2>
+<a NAME="Other_functions"></a>Other Functions</h2>
+Various other functions supported by the DV, such as simple arithmetic
+operations, renaming registers, etc. can be accessed from the function
+window, activated by clicking on the <b>Functions</b> button on the main
+window:
+<p><img SRC="function_1.jpg" height=576 width=668>
+<p>In the function window, the desired function can be selected by clicking
+on the corresponding item in the <b>Function</b> list on the left. Most
+supported functions are either unary or binary: unary functions operate
+on register <b>A</b>, while binary functions operate on registers <b>A</b>
+and <b>B</b>. Register <b>A</b>(<b>B</b>) can be set by either typing its
+name into the corresponding text widget, or left(right)-clicking on it
+in the <b>Register</b> list to the right of the <b>Function</b> list. An
+optional mask register, as explained in <a href="#differentiation">differentiation</a>
+above can also be given, and can be selected by clicking on the register
+name with the right mouse button in the <b>Register</b> list.
+<p>Certain functions take arguments. The arguments are described in the
+information box on the lower right portion of the window after the function
+is selected, and the desired arguments can be entered in the <b>Arguments</b>
+widget.
+<p>With most functions a <i>filter</i> can be applied to the source registers
+<b>A</b> and <b>B,</b> that cause the function to only operate on a portion
+of the registers. When the button to the left of <b>Filter</b> is selected,
+the filter, entered in the text widget to the right, is applied. The format
+for the filter is as follows:
+<p><b><tt>t=&lt;ivec>; l=&lt;ivec>; [cb=x1,x2,y2,y2,... | ib=i1,i2,j1,j2,...]</tt></b>
+<p><b><tt>&lt;ivec></tt></b> is an <i>index vector</i> (as used by <b>RNPL</b>
+for output control), which is a convenient notation for specifying sequences
+of integers. An example of an index vector is <b>1,3,5-10/2,15-*</b>. Single
+numbers are interpreted verbatim, a term <b>n1-n1/s </b>denotes the sequence
+<b>n1,n1+s,n1+2s,...,n2</b>,
+and an asterisk denotes the last valid index of the relevant data structure.
+The <b><tt>t=&lt;ivec> </tt></b>statement selects a sequence of times (1
+to the number of times within a register, with 1 being the earliest time),
+and the <b><tt>l=&lt;ivec> </tt></b>statement selects a sequence of levels
+(1 to the number of resolution-levels within a register, 1 being the coarsest
+level). The <b><tt>cb=x1,x2,y2,y2,...
+</tt></b>term specifies a <i>coordinate
+bounding box</i>, whereby all data outside of the rectangle <b>[x1..x2,y1..y2,...]</b>
+will be clipped. Similarly
+<b><tt>ib=i1,i2,j1,j2,... </tt></b>specifies
+an <i>index bounding box</i>, whereby each grid is clipped relative to
+its array shape <b>[1..Nx,1..Ny,...]</b>. Only one of the coordinate or
+index bounding box statements may be specified within a filter argument;
+any combination of a time index vector, a level index vector, and a bounding
+box statement may be specified --- multiple selections are interpreted
+with a logical <i>and</i>.
+<p>When <b>Go!</b> is clicked, a new register with name specified by <b>New
+name</b> will be created containing the result of the differentiation.
+If the <b>over-write existing registers?</b> button is <i>not</i> selected,
+then a warning prompt will be issued if a register with the name <b>New
+name</b> already exists.
+<p><b>history</b> lists are available for many text widgets in DV, and
+store a short list of the most recent entries of the corresponding text
+widget. Selecting an item within the history will copy the item to the
+text widget.
+<br>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="sec_32.html">Previous</a>&nbsp;&nbsp;&nbsp;
+<a href="sec_34.html">Next</a>
+</body>
+</html>

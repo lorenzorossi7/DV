@@ -1,0 +1,44 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Visualizing 3D data
+<hr WIDTH="100%"></h2></center>
+The DV was offers some facilities to visualize 3D data sets. Specifically,
+the <i>3D slicer</i> window allows one to choose a particular coordinate
+slice of a register to display when the <b>Send to local view</b> is used.
+As an example, there is a function, <b>inspiral</b>, in DV that produces
+a 3D register containing an x-y-t slice of a black hole merger (calculated
+using Newtonian gravity plus the quadrupole formula, and the output is
+the Newtonian potential). After selecting <b>inspiral</b> from the function
+window, enter the following arguments (1,10,1,120,100), and press <b>Go!</b>&nbsp;
+(<b>NOTE</b>: <i>if you have a slower machine, it is advised that you reduce
+the resolution by changing the arguments to something like (1,10,3,120,32)</i>
+):
+<p><img SRC="function_insp.jpg" height=576 width=668>
+<p>Two registers, <b>inspiral_2D</b> and <b>inspiral_3D</b> should be produced.
+Now click on <b>3D Slicer</b> in the main window, select the <b>inspiral_3D</b>
+register, and click on <b>Send to local view</b>. In the 3D slicer window,
+a point-map of the 3D data set is drawn, and various widgets allow one
+to select different slices of this data. Changing a slice option causes
+the corresponding 2D slice to be drawn in the 2D local view window. For
+example, after some manipulation of the view (and changing some of the
+<a href="sec_48.html">send options</a>), the 3D slicer window will look
+something like this:
+<p><img SRC="3d_1.jpg" height=496 width=538>
+<p>and the corresponding z=62 slice (in this case) will look like this
+in the 2D window:
+<p><img SRC="local_view_3.jpg" height=706 width=718>
+<p>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="sec_35.html">Previous</a>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.17-21mdksmp i686) [Netscape]">
+</head>
+<body>
+
+<center>
+<h2>
+Browsing the contents of registers
+<hr WIDTH="100%"></h2></center>
+Each register can consist of an arbitrary number of grids. A given grid
+within a register is identified by its <b>time</b>, <b>resolution</b>,
+and <b>coordinate domain</b> that it occupies. In the DV, the grids are
+organized as follows: a register consists of a set of distinct time levels,
+each time level consists of a set of distinct resolutions (or simply <i>levels</i>),
+and each resolution consists of a list of grids occupying different coordinate
+domains. On the main DV window, this register structure can be browsed
+by double-clicking relevant items with the left mouse button. For example,
+double-clicking on <b>2d_phi_0 </b>will reveal the following:
+<p><img SRC="DV_main_2.jpg" height=496 width=638>
+<p>In this case, <b>2d_phi_0</b> has 11 time levels. Double-clicking on
+time level 5 will show that there are grids with a single resolution (labeled
+by the mesh spacing of the first coordinate <b>dx</b>) at this time:
+<p><img SRC="DV_main_3.jpg" height=496 width=638>
+<p>Finally, double-clicking on <b>dx(1)=...</b> above will show the single
+101x101 grid stored there:
+<p><img SRC="DV_main_4.jpg" height=496 width=638>
+<p>To hide a sub-list of information, simply double-click on the corresponding
+item again.
+<p>The numerical contents of an individual grid can be viewed using the
+data browser (DB). First, click on the <b>Data Browser </b>button on the
+main window to open the DB window. Then, single clicking on individual
+grids with the <i>middle mouse button </i>will refresh the DB window with
+the corresponding data.
+<p>NOTE: currently, only 1D and 2D grid functions can be viewed with the
+DB; furthermore, the DB ignores curvilinear coordinate information, hence
+the coordinate labels for such grids may be incorrect.
+<p>
+<hr WIDTH="100%">
+<br><a href="index.html">Home</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="sec_3.html">Previous</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="sec_32.html">Next</a>
+</body>
+</html>

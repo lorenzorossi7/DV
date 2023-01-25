@@ -1,0 +1,81 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+prefix = @prefix@
+bindir = $(prefix)/bin
+DV_HOME = @DV_HOME@
+
+# Programs
+CTOF = mfi
+PERL = @PERL@
+RPCGEN = @RPCGEN@
+RANLIB = @RANLIB@
+AR = @AR@
+CC = @CC@
+F77 = @F77@
+
+BBH_SYSTEM=@BBH_SYSTEM@
+
+# Compiler Commands
+F77_TRANSFORM = @F77_TRANSFORM@
+
+
+LIBS       = @SDFTODV_LIBS@ -lm 
+LDFLAGS    = @LDFLAGS@ @SDFTODV_LIB_PATHS@ -L.
+
+CC       = @CC@
+CFLAGS   = -c @CFLAGS@
+CPPFLAGS = @CPPFLAGS@ @APP_INCLUDE_PATHS@ @SDFTODV_INCLUDE_PATHS@ @DEFS@ \
+           -I$(DV_HOME)/ -I$(DV_HOME)/DV_gui/ -I$(DV_HOME)/vis/ -I$(DV_HOME)/DVCliser/
+
+CC_COMP  = $(CC) $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS)
+F77_LOAD   = $(F77) $(F77FLAGS) $(LDFLAGS)
+
+.f.o:
+	$(F77_COMP) -c $*.f
+
+.c.o:
+	$(CC_COMP) -c $*.c
+
+OBJS = common_fncs.o
+
+EXECUTABLES = sdftodv dvcomm dvrcomm asciitosdf
+all: $(EXECUTABLES)
+
+common_fncs.o: common_fncs.c common_fncs.h ../DVault.h
+	$(CC_COMP) common_fncs.c
+
+sdftodv.o: sdftodv.c common_fncs.h
+	$(CC_COMP) -c sdftodv.c
+
+sdftodv: sdftodv.o common_fncs.o 
+	$(CC_LOAD) sdftodv.o $(OBJS) $(LIBS) -o sdftodv 
+	cp sdftodv ../bin
+
+dvcomm: dvcomm.o common_fncs.o 
+	$(CC_LOAD) dvcomm.o $(OBJS) $(LIBS) -o dvcomm 
+	cp dvcomm ../bin
+
+dvrcomm: dvrcomm.o common_fncs.o 
+	$(CC_LOAD) dvrcomm.o $(OBJS) $(LIBS) -o dvrcomm 
+	cp dvrcomm ../bin
+
+asciitosdf: asciitosdf.o 
+	$(CC_LOAD) asciitosdf.o $(OBJS) $(LIBS) -o asciitosdf 
+	cp asciitosdf ../bin
+
+clean:
+	rm *.o > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm $(EXECUTABLES) > /dev/null 2>&1
+	(cd ../bin; rm $(EXECUTABLES)) > /dev/null 2>&1
+	rm *_.c > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1
