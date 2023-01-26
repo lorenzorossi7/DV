@@ -89,7 +89,7 @@ From: ubuntu:jammy
     #Comment out the lines below to avoid cloning the DV git repository of Lorenzo Rossi
     git clone https://github.com/lorenzorossi7/DV.git
     cd DV
-    #git checkout eval_r_on_compactified_sphere
+    #git checkout <name_of_branch>
     cd ..
 
     export LIB_PATHS="/usr/lib/x86_64-linux-gnu /usr/lib32"     
