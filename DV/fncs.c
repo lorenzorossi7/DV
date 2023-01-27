@@ -5856,8 +5856,8 @@ grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args,
             for (i=0; i<Ntheta; i++)
             {
                theta=i*M_PI/(Ntheta-1);
-               x0[0]=((-1+sqrt(1+R0**2))/R0)*cos(theta);
-               x0[1]=((-1+sqrt(1+R0**2))/R0)*sin(theta);
+               x0[0]=((-1+sqrt(1+R0*R0))/R0)*cos(theta);
+               x0[1]=((-1+sqrt(1+R0*R0))/R0)*sin(theta);
                ind=i+k*Ntheta;
                ret=eval_2d(x0[0],x0[1],g,mask,mask_val,&evalr[ind]); 
             }
@@ -5870,9 +5870,9 @@ grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args,
                   theta=i*M_PI/(Ntheta-1);
                   phi=j*2*M_PI/(Nphi-1);
                   ind=i+j*Ntheta+k*Ntheta*Nphi;
-                  x0[0]=((-1+sqrt(1+R0**2))/R0)*cos(phi)*sin(theta);
-                  x0[1]=((-1+sqrt(1+R0**2))/R0)*sin(phi)*sin(theta);
-                  x0[2]=((-1+sqrt(1+R0**2))/R0)*cos(theta);
+                  x0[0]=((-1+sqrt(1+R0*R0))/R0)*cos(phi)*sin(theta);
+                  x0[1]=((-1+sqrt(1+R0*R0))/R0)*sin(phi)*sin(theta);
+                  x0[2]=((-1+sqrt(1+R0*R0))/R0)*cos(theta);
                   ret=eval_3d(x0[0],x0[1],x0[2],g,mask,mask_val,&evalr[ind]); 
                }
             }
