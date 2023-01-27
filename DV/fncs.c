@@ -5651,6 +5651,136 @@ void gf_gw_vis(char *args)
 //
 // NOTE: assumes levels sorted from lowest res to highest res
 //-----------------------------------------------------------------------------
+//grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args, int first_call)
+//{
+//   grid *g=it_a->g,*ret_g,*nxt_g;
+//   grid *ng;
+//   int i,j,k,ret,ind;
+//   static time_str *ts;
+//   static double R,*evalr,coords[6],R1,dR;
+//   static int error,dim,numt,Ntheta,Nphi,Ntot,shape[3],ndim,nR;
+//   double f,x0[3],theta,phi,R0;
+//
+//   ret_g=0;
+//   if (first_call)
+//   {
+//      error=0;
+//      ts=0;
+//      dim=g->dim;
+//      R1=0;
+//      nR=1;
+//      if (args && strlen(args)>0) sscanf(args,"%lf,%i,%i,%lf,%i", &R,&Ntheta,&Nphi,&R1,&nR);
+//      else
+//      {
+//         printf("gf_eval_r: arguments required\n"); error=1; return 0;
+//      }
+//      ndim=dim;
+//      if (R1>R && nR>1) { ndim=dim+1; dR=(R1-R)/(nR-1); } else { nR=1; R1=R; dR=1;}
+//      shape[0]=Ntheta;
+//      coords[0]=0;
+//      coords[1]=M_PI;
+//      switch(dim)
+//      {
+//         case 2: printf("gf_eval_r: evaluating gf at compactified radius R=%lf, Ntheta=%i (R1=%lf, nR=%i) \n",R,Ntheta,R1,nR); 
+//                 Ntot=Ntheta;
+//                 if (ndim==3) { shape[1]=nR; coords[2]=R; coords[3]=R1; Ntot*=nR; }
+//                 break;
+//         case 3: printf("gf_eval_r: evaluating gf at compactified radius R=%lf, Ntheta=%i,Nphi=%i (R1=%lf, nR=%i)\n",R,Ntheta,Nphi,R1,nR); 
+//                 Ntot=Ntheta*Nphi;
+//                 shape[1]=Nphi;
+//                 coords[2]=0;
+//                 coords[3]=2*M_PI;
+//                 if (ndim==4) { shape[2]=nR; coords[4]=R; coords[5]=R1; Ntot*=nR;}
+//                 break;
+//      }
+//      if (!(evalr=(double *)malloc(sizeof(double)*Ntot)))
+//      {
+//         printf("gf_eval_r: out of memory\n");
+//         return 0;
+//      }
+//      for (i=0; i<Ntot; i++) evalr[i]=0;
+//      ts=it_a->ts;
+//   }
+//
+//   if (!evalr) return 0;
+//
+//   ng=0;
+//
+//   if (it_a->ts!=ts)
+//   {
+//      if (!(ng=galloc(ndim-1,COORD_UNIFORM,shape,ts->time,coords,0,evalr))) return 0;
+//      for (i=0; i<Ntot; i++) evalr[i]=0;
+//      ts=it_a->ts;
+//   }
+//
+//   if (g->dim!=dim)
+//   {
+//      printf("gf_eval_r: error ... multiple grid dimensions in register\n");
+//      printf("   -> grid of dimension %i will be dropped\n",g->dim);
+//   }
+//   else
+//   {
+//      for (R0=R,k=0; k<nR; R0+=dR,k++) switch(dim)
+//      {
+//         case 2: 
+//            for (i=0; i<Ntheta; i++)
+//            {
+//               theta=i*M_PI/(Ntheta-1);
+//               x0[0]=R0*cos(theta);
+//               x0[1]=R0*sin(theta);
+//               ind=i+k*Ntheta;
+//               ret=eval_2d(x0[0],x0[1],g,mask,mask_val,&evalr[ind]); 
+//            }
+//            break;
+//         case 3: 
+//            for (i=0; i<Ntheta; i++)
+//            {
+//               for (j=0; j<Nphi; j++)
+//               {
+//                  theta=i*M_PI/(Ntheta-1);
+//                  phi=j*2*M_PI/(Nphi-1);
+//                  ind=i+j*Ntheta+k*Ntheta*Nphi;
+//                  x0[0]=R0*cos(phi)*sin(theta);
+//                  x0[1]=R0*sin(phi)*sin(theta);
+//                  x0[2]=R0*cos(theta);
+//                  ret=eval_3d(x0[0],x0[1],x0[2],g,mask,mask_val,&evalr[ind]); 
+//               }
+//            }
+//            break;
+//      }
+//   }
+//
+//   ret=1;
+//   save_s_iter(it_a);
+//   nxt_g=next_g(it_a);
+//   while(nxt_g && ret) { if (it_a->selected!=GIV_OFF) ret=0; nxt_g=next_g(it_a); }
+//   restore_s_iter(it_a);
+//   if (ret) 
+//   { 
+//      if (!ng) {if (!(ng=galloc(ndim-1,COORD_UNIFORM,shape,ts->time,coords,0,evalr))) return 0;}
+//      free(evalr); 
+//   }
+//
+//   return ng;
+//}
+
+//-----------------------------------------------------------------------------
+// Implemented by LR
+// gh3d specific: evaluates a 3D or 2D axisymmetric function on
+// a sphere of uncompactified radius R ... option arguments specify
+// a range of R ... resultant grid will be 1 dim higher then
+//
+// NOTE: we use a different relation between compactified and uncompactified coordinates
+// with respect to the relation used in the original version of gf_eval_r (commented out above)
+// The relation between the uncompactified radius R and the compactified radius rho
+// that we use is R=2*rho/(1-rho^2), i.e., rho=(-1+sqrt(1+R^2))/R.
+// This is the compactification that leads to coordinates used, for example, in the code of arXiv:2011.12970.
+//
+// NOTE: assumes levels sorted from lowest res to highest res
+//
+// LR: commented out to replace with version that evaluates a 3D or 2D 
+// axisymmetric function on a sphere of COMPACTIFIED radius R. Implemented below
+//-----------------------------------------------------------------------------
 grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args, int first_call)
 {
    grid *g=it_a->g,*ret_g,*nxt_g;
@@ -5681,11 +5811,11 @@ grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args,
       coords[1]=M_PI;
       switch(dim)
       {
-         case 2: printf("gf_eval_r: evaluating gf at compactified radius R=%lf, Ntheta=%i (R1=%lf, nR=%i) \n",R,Ntheta,R1,nR); 
+         case 2: printf("gf_eval_r: evaluating gf at R=%lf, Ntheta=%i (R1=%lf, nR=%i) \n",R,Ntheta,R1,nR); 
                  Ntot=Ntheta;
                  if (ndim==3) { shape[1]=nR; coords[2]=R; coords[3]=R1; Ntot*=nR; }
                  break;
-         case 3: printf("gf_eval_r: evaluating gf at compactified radius R=%lf, Ntheta=%i,Nphi=%i (R1=%lf, nR=%i)\n",R,Ntheta,Nphi,R1,nR); 
+         case 3: printf("gf_eval_r: evaluating gf at R=%lf, Ntheta=%i,Nphi=%i (R1=%lf, nR=%i)\n",R,Ntheta,Nphi,R1,nR); 
                  Ntot=Ntheta*Nphi;
                  shape[1]=Nphi;
                  coords[2]=0;
@@ -5726,8 +5856,8 @@ grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args,
             for (i=0; i<Ntheta; i++)
             {
                theta=i*M_PI/(Ntheta-1);
-               x0[0]=R0*cos(theta);
-               x0[1]=R0*sin(theta);
+               x0[0]=((-1+sqrt(1+R0**2))/R0)*cos(theta);
+               x0[1]=((-1+sqrt(1+R0**2))/R0)*sin(theta);
                ind=i+k*Ntheta;
                ret=eval_2d(x0[0],x0[1],g,mask,mask_val,&evalr[ind]); 
             }
@@ -5740,9 +5870,9 @@ grid *gf_eval_r(s_iter *it_a, grid *mask, double mask_val, char *nf, char *args,
                   theta=i*M_PI/(Ntheta-1);
                   phi=j*2*M_PI/(Nphi-1);
                   ind=i+j*Ntheta+k*Ntheta*Nphi;
-                  x0[0]=R0*cos(phi)*sin(theta);
-                  x0[1]=R0*sin(phi)*sin(theta);
-                  x0[2]=R0*cos(theta);
+                  x0[0]=((-1+sqrt(1+R0**2))/R0)*cos(phi)*sin(theta);
+                  x0[1]=((-1+sqrt(1+R0**2))/R0)*sin(phi)*sin(theta);
+                  x0[2]=((-1+sqrt(1+R0**2))/R0)*cos(theta);
                   ret=eval_3d(x0[0],x0[1],x0[2],g,mask,mask_val,&evalr[ind]); 
                }
             }
