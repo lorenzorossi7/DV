@@ -1,4 +1,4 @@
-#Lorenzo Rossi: this is a file created by Giles Greeway to install RNPL,xforms,xvs and DV in a container (on a machine that runs Linux, but it can easily be adapted to other operating systems) via the command
+#Lorenzo Rossi: this is a file created by Giles Greeway to install RNPL,xforms,xvs and DV in a container via the command
 #apptainer build <name_of_container> DV.def
 #or also
 #singularity build <name_of_container> DV.def
@@ -89,7 +89,7 @@ From: ubuntu:jammy
     #Comment out the lines below to avoid cloning the DV git repository of Lorenzo Rossi
     git clone https://github.com/lorenzorossi7/DV.git
     cd DV
-    #git checkout <name_of_branch>
+    git checkout <name_of_branch>
     cd ..
 
     export LIB_PATHS="/usr/lib/x86_64-linux-gnu /usr/lib32"     
@@ -102,10 +102,10 @@ From: ubuntu:jammy
     
     cd xvs && ./configure --prefix=/usr/local && make install && cd ..
 
-    #Install lorenzorossi7-GitHub version
+    #lorenzorossi7-GitHub version
     cd DV/DV && ./configure --prefix=/usr/local && make install && cd ../..
 
-    #Install original version
+    #original version
     #cd DV && ./configure --prefix=/usr/local && make install && cd ..
 
  
