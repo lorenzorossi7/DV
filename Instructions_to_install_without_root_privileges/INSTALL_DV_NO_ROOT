@@ -1,0 +1,57 @@
+#Commands used for installing DV and all the prerequisites on SuperMUC WITHOUT ROOT PRIVILEGES
+export INST_PATH=$PWD/inst
+
+module rm devEnv
+module sw spack spack/staging/20.2.0
+#module rm intel-mpi intel-mkl intel
+module load gcc/8 intel-mkl/2020-gcc8 intel-mpi/2019-gcc
+
+#wget will download the relevant tar ball if the cluster allows for it. SuperMUC does not allow for online connections, so we used tar xf instead.
+#wget ftp://laplace.physics.ubc.ca/pub/rnpletal/rnpletal.tar.gz
+tar xf rnpletal.tar.gz
+cd rnpletal
+./Install.gnu $INST_PATH
+cd ..
+export PATH=$PATH:$INST_PATH/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INST_PATH/lib
+
+#wget ftp://laplace.physics.ubc.ca/pub/xforms-1.0/xforms-1.0.tar.gz
+tar xf xforms-1.0.tar.gz
+cd xforms-1.0
+sed -i 's/#define InstallNonstandard NO/#define InstallNonstandard YES/g' Imakefile
+sed -i "s*#define XFormsNonstandardInstallDir /usr/local*#define XFormsNonstandardInstallDir $INST_PATH*g" Imakefile
+xmkmf -a
+make install
+cd ..
+
+#wget ftp://laplace.physics.ubc.ca/pub/mpeg_encode/mpeg_encode-1.5c.tar.gz
+tar xf mpeg_encode-1.5c.tar.gz
+cd mpeg_encode-1.5c
+./configure --prefix=$INST_PATH
+make install
+cd ..
+
+#wget ftp://laplace.physics.ubc.ca/pub/xvs/xvs.tar.gz
+tar xf xvs.tar.gz
+cd xvs
+./configure INCLUDE_PATHS=./src --prefix=$INST_PATH
+make install
+cd ..
+#expect some errors:
+#xvs executable fails to link due to missing symbols like d_log, d_sqrt, d_sin, d_cos
+#Which library should contain it?
+
+#wget ftp://laplace.physics.ubc.ca/pub/DV/DV.tar.gz
+tar xf DV.tar.gz
+cd DV
+./configure CFLAGS=-I$INST_PATH/include/X11 --prefix=$INST_PATH
+make install
+cd ..
+
+#DV is now installed.
+#To make it work, now set variables to find the required library libformsGL.so.1.
+#Put this in a file that is sourced before using DV:
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/dss/dsshome1/02/di82taw/tmp_DV/inst/lib
+
+#Set also PATH to the relevant binary files, by sourcing a file that contains the following:
+#export PATH=$PATH:/dss/dsshome1/02/di82taw/tmp_DV/inst/bin
