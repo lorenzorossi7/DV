@@ -1,0 +1,111 @@
+#Lorenzo Rossi: this is a file created by Giles Greeway to install RNPL,xforms,xvs and DV in a container via the command
+#apptainer build <name_of_container> DV.def
+#or also
+#singularity build <name_of_container> DV.def
+#without root privileges.
+
+#DV can then be used via
+#apptainer shell <name_of_container>
+#DV &
+#or
+#singularity shell <name_of_container>
+#DV &
+
+#NOTE: one can replace wget commands below with git clone (in that case one also needs to add git to apt install list in order to download Git repositories instead of the original version of the various source codes.
+
+BootStrap: docker
+From: ubuntu:jammy
+
+# Purpose: DV (Data Viewer)
+# Author: G Greeway, after S Butcher
+# Built on apptainer 1.1.3-1.el7
+# See also:
+#   http://laplace.physics.ubc.ca/Doc/rnpletal/rnpletal-ubuntu.html
+#   http://laplace.phas.ubc.ca/Doc/rnpletal/
+
+#
+# Building the optional "mpeg_encode" currently fails with:
+# jpeg.c: In function 'ReadJPEG':
+# jpeg.c:510:51: error: 'struct jpeg_decompress_struct' has no member named 'min_DCT_scaled_size'; did you mean 'min_DCT_h_scaled_size'?
+#  510 |   buffer_height = cinfo.max_v_samp_factor * cinfo.min_DCT_scaled_size;
+#      |                                                   ^~~~~~~~~~~~~~~~~~~
+#      |                                                   min_DCT_h_scaled_size
+
+%environment
+    export SHELL=/bin/bash
+    
+%post
+    apt update && apt install -y \
+        bison \
+        build-essential \
+        ffmpeg \
+        flex \
+        fontconfig \
+        gfortran \
+        libforms-bin \
+        libforms-dev \
+        libformsgl2 \
+        libglu1-mesa-dev \
+        libjpeg-dev \
+        libtiff-dev \
+        libtiff-opengl \
+        libxext-dev \
+        mesa-common-dev \
+        mesa-utils \
+        t1-xfree86-nonfree \
+        ttf-xfree86-nonfree \
+        ttf-xfree86-nonfree-syriac \
+        wget \
+        xfonts-100dpi \
+        xfonts-100dpi-transcoded \
+        xfonts-75dpi \
+        xfonts-75dpi-transcoded \
+        xutils-dev \
+	git
+    
+    mkdir /build && cd build
+    
+    wget ftp://laplace.physics.ubc.ca/pub/rnpletal/rnpletal.tar.gz
+    tar zxf rnpletal.tar.gz
+    rm  rnpletal.tar.gz
+    
+    wget ftp://laplace.physics.ubc.ca/pub/xforms-1.0/xforms-1.0.tar.gz
+    tar zxf xforms-1.0.tar.gz
+    rm xforms-1.0.tar.gz
+    
+    #wget ftp://laplace.physics.ubc.ca/pub/mpeg_encode/mpeg_encode-1.5c.tar.gz
+    #tar zxf mpeg_encode-1.5c.tar.gz
+    #rm mpeg_encode-1.5c.tar.gz
+    
+    wget ftp://laplace.physics.ubc.ca/pub/xvs/xvs.tar.gz 
+    tar zxf xvs.tar.gz
+    rm xvs.tar.gz
+    
+    #Uncomment lines below to install original version of DV
+    #wget ftp://laplace.physics.ubc.ca/pub/DV/DV.tar.gz
+    #tar zxf DV.tar.gz
+    #rm DV.tar.gz
+
+    #Comment out the lines below to avoid cloning the DV git repository of Lorenzo Rossi
+    git clone https://github.com/lorenzorossi7/DV.git
+    cd DV
+    git checkout <name_of_branch>
+    cd ..
+
+    export LIB_PATHS="/usr/lib/x86_64-linux-gnu /usr/lib32"     
+    
+    cd rnpletal && ./Install.gnu /usr/local && cd ..
+
+    cd xforms-1.0 && xmkmf -a && make install && cd ..
+
+    #cd mpeg_encode-1.5c && ./configure --prefix=/usr/local && make install && cd ..
+    
+    cd xvs && ./configure --prefix=/usr/local && make install && cd ..
+
+    #lorenzorossi7-GitHub version
+    cd DV/DV && ./configure --prefix=/usr/local && make install && cd ../..
+
+    #original version
+    #cd DV && ./configure --prefix=/usr/local && make install && cd ..
+
+ 
