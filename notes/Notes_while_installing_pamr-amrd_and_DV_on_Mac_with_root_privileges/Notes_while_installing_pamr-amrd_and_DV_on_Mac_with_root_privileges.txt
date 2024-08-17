@@ -1,0 +1,161 @@
+\documentclass[12pt,a4paper,notitlepage]{article}
+
+%\usepackage{titling}
+%\usepackage{blindtext}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{lmodern}
+\usepackage{indentfirst}
+\usepackage{nonumonpart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage[bf]{caption}
+\usepackage{dcolumn}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\usepackage{enumerate}
+\usepackage{subfig}
+\usepackage{tikz}
+\usepackage{syntonly}
+\usepackage{listings}
+\usepackage{bookmark}
+\usepackage{tensor}
+\usepackage{tabularx}
+\usepackage{frontespizio}
+\usepackage{graphicx}
+\usepackage{emptypage}
+\usepackage{float}
+\usetikzlibrary{angles,arrows.meta,intersections,patterns,plotmarks,quotes,shapes}
+\pgfplotsset{/pgf/number format/use comma,compat=newest,legend style={font=\scriptsize}}
+\usepackage{hyperref}
+%\hypersetup{colorlinks,linkcolor=black}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=2.2cm,right=2.2cm]{geometry}
+%\usepackage{marvosym}
+%\usepackage[a4paper,top=1cm,bottom=1cm,left=1cm,r4cm]{geometry}
+
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{remark}{Remark}
+\newtheorem*{example}{Example}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+
+%\newcommand{\ind}{\indices}
+
+%\makeatletter
+%\newcommand\deftoclevel[2][chapter]{
+%\expandafter\renewcommand\csname toclevel@#1\endcsname{#2}}
+%\makeatother
+
+
+
+
+
+
+\begin{document}
+\title{Installing pamr-amrd and DV on Mac}
+\author{Lorenzo Rossi\footnote{Email: l.rossi@qmul.ac.uk}\\
+\small School of Mathematical Sciences\\
+\small Queen Mary University of London\\
+\small Mile End Road, London E1 4NS, United Kingdom}
+
+
+
+\maketitle
+\thispagestyle{empty}
+
+\cleardoublepage
+\setcounter{page}{1}
+\tableofcontents
+
+\section{Instructions for pamr-amrd}
+
+We try to follow these instructions http://laplace.physics.ubc.ca/Doc/rnpletal/. Install OpenMPI and set the f77 or gfortran compiler by setting environment variables: export CC='mpicc', export CXX='mpic++', export F77='mpif77' 
+or export CC='gcc', export CXX='g++', export F77='gfortran'. Then
+\begin{itemize}
+\item Download, untar (the command should be tar -xvf <filename.tar.gz>) and Install RNPL first by ./Install.gnu /usr/local.
+
+\item Install pamr/amrd by ./configure --prefix=<path where you want to install it>. If we don't use the default path /usr/local, it's not gonna find mpi.h and bbhutil.h automatically, so we have to manually set environment variable $INCLUDE\_PATHS$ to point to these files (bbhutil.h is in RNPL, in the include folder). Then, it's not going to find libbbhutil.a, which is also in RNPL, in the lib folder. We need to point to this by setting the $LIBRARY\_PATH$ environment variable.
+Once this is done the ./configure command should be successful. We then need to do "make" or, equivalently, "make install".
+
+\item If we do "make" starting from the master branch of pamr, we're gonna get an error related to all the lines with $\#include <malloc.h>$. To avoid this issue, we change these lines to $\#include <stdlib.h>$ (as far as I understand, stdlib.h is the Mac version of malloc.h in Linux). Now the "make" should work and the installation of pamr is successful.
+\end{itemize}
+
+\section{Instructions for AdSnD codes}
+
+If we now do ./configure, everything should work fine. However, when we do make, we're gonna get the error "ld: library not found for -lgfortran". To fix this, we need to dynamically the library libgfortran.a . This can be done by setting the environment variable $LIBRARY\_PATH$ by sourcing, for example, 
+
+\noindent
+export $LIBRARY\_PATH="/usr/local/opt/gcc/lib/gcc/8"$.
+After doing this, the installation should be successful and the code should work just fine.
+
+\section{Instructions for DV}
+
+To install DV we need to install the following preliminary packages from homebrew:
+
+imake
+libtiff
+libjpeg.
+
+Then we can install xforms. We download and untar (for example, by tar -xvf <filename.tar.gz>) as explained in 
+http://laplace.physics.ubc.ca/Doc/rnpletal/.  .The Mac probably will not recognize the command xmkmf -a, because we need to install the imake package first. We can do that by brew install imake. Then, we "make install". We're gonna have the following error: it can't find the library for libXext 
+
+ERROR MESSAGE:
+
+ld: library not found for -lXext
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+ The first error can be solved by dynamically link the library libXext.dylib in /opt/X11/lib by setting LIBRARY_PATH (export LIBRARY_PATH=$LIBRARY_PATH:/opt/X11/lib). Note: If it can't find libjpeg.h too, it means we need to do "brew install libjpeg".
+ 
+ Now the installation of xforms should be successful.
+ 
+ 
+ We then install DV. Download from http://laplace.physics.ubc.ca/Doc/rnpletal/ and untar it.
+ The configure command won't find rnpl automatically, we need to set the PATH variable to where the rnpl binary is.
+ The configure command won't find forms.h (which is in xforms-1.0/lib/ and xforms-1.0/lib/include/ just installed). Just set the INCLUDE_PATHS environment variable. It will now configure, but there will be an error when doing make install:
+ glcanvas.h not found. We need to set INCLUDE_PATHS to /usr/local/include/X11.
+ 
+ The make should now be successfull. 
+ 
+ There is going to be the following errror:
+ dyld: Symbol not found: __cg_png_create_info_struct
+ Referenced from: /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
+ Expected in: /opt/X11/lib/libPng.dylib
+in /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
+Abort trap: 6
+
+which we can solve, as suggested here https://lists.macports.org/pipermail/macports-users/2010-November/022662.html,
+
+by sudo ln -sf /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libPng.dylib /opt/X11/lib/libPng.dylib
+
+
+Then we're gonna have a similar issue
+
+dyld: Symbol not found: _gll_noop
+ Referenced from: /System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL
+ Expected in: /System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL
+in /System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL
+Abort trap: 6
+
+which we solve similarly by
+
+sudo ln -sf /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib /opt/X11/lib/libGL.dylib
+
+.
+
+DV should now work. If it's slow we might try to use the 2.7.8 version of XQuartz (not clear if this improves anything).
+
+With both 2.7.8 AND 2.7.11 version of XQuartz, DV seems to be very slow on the Mojave Operating System.
+
+ 
+ 
+
+\end{document}
+
